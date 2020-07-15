@@ -72,10 +72,10 @@
 //     gyro_y_cal /= n;
 //     gyro_z_cal /= n;
 
-//     // Serial.println();
-//     // Serial.println(gyro_x_cal);
-//     // Serial.println(gyro_y_cal);
-//     // Serial.println(gyro_z_cal);
+//     Serial.println();
+//     Serial.println(gyro_x_cal);
+//     Serial.println(gyro_y_cal);
+//     Serial.println(gyro_z_cal);
 //     Serial.println(" Done.");
 //     if (cntFails > 0)
 //     {
