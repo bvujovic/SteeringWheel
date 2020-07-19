@@ -1,31 +1,47 @@
 // https://stackoverflow.com/questions/62224747/esp8266-433mhz-and-radiohead-library
 
-#include <RH_ASK.h>
-#include <SPI.h>
+#include <WiFiServerBasics.h>
 
-RH_ASK driver(2000, 16, 12, 10, false); // ESP8266: do not use pin 11
+const int pinLed = LED_BUILTIN;
+void ledON(bool on) { digitalWrite(pinLed, !on); }
+
+#include "Enums.h"
+#include "RadioRecv.h"
+RadioRecv radio;
+ulong msRadioOff;
 
 void setup()
 {
     Serial.begin(115200);
-    if (!driver.init())
-        Serial.println("init failed !!!");
+    pinMode(pinLed, OUTPUT);
+    ledON(false);
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    WiFi.forceSleepBegin();
+    delay(100);
+    radio.init();
 }
-
-int cnt = 0;
-long ms = 0;
-#define DATA_LEN 2
-uint8_t n = DATA_LEN;
-uint8_t s[DATA_LEN];
 
 void loop()
 {
-    if (driver.recv(s, &n)) // Non-blocking
+    if (radio.isON())
     {
-        // driver.printBuffer("Got:", s, n);
-
-        Serial.print((int8_t)s[0]);
-        Serial.print('\t');
-        Serial.println((int8_t)s[1]);
+        RadioRecvCode code = radio.refresh();
+        if (code == MotCmd)
+            radio.getMotCmd(); //* commands.add( radio.getmotcmd() );
+        else if (code == End)
+        {
+            ledON(true);
+            msRadioOff = millis();
+        }
+    }
+    else
+    {
+        if (millis() - msRadioOff > 10000)
+        {
+            radio.resume();
+            ledON(false);
+        }
+        delay(10);
     }
 }

@@ -40,6 +40,6 @@ public:
     bool calibrate();
     bool init();
     void refresh();
-    float getPitch() { return angle_pitch_output; }
+    float getPitch() { return -angle_pitch_output; }
     float getRoll() { return angle_roll_output; }
 };
