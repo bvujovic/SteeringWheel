@@ -52,7 +52,7 @@ RadioRecvCode RadioRecv::refresh()
                 end();
             return (RadioRecvCode)x;
         }
-        return MotCmd;
+        return WheelPos;
     }
     else
         return None;
@@ -83,5 +83,5 @@ void RadioRecv::getMotCmd()
     Serial.print(cmdX);
     Serial.print('\t');
     Serial.println(cmdY);
-    //* return new MotCmd...
+    //* return new WheelPos...
 }

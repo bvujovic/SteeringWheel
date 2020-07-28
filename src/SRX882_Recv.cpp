@@ -27,7 +27,7 @@ void loop()
     if (radio.isON())
     {
         RadioRecvCode code = radio.refresh();
-        if (code == MotCmd)
+        if (code == WheelPos)
             radio.getMotCmd(); //* commands.add( radio.getmotcmd() );
         else if (code == End)
         {

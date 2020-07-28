@@ -21,34 +21,35 @@ void Joop::setup_mpu_6050_registers()
 
 bool Joop::calibrate()
 {
-    Serial.print("\nCalibrating gyro... ");
+    // Serial.print("\nCalibrating gyro... ");
+    gyro_x_cal = gyro_y_cal = gyro_z_cal = 0;
     const int n = 1000; // Joop: 2000
     for (int i = 0; i < n; i++)
     {
-        if (i % 200 == 0)
-            Serial.print('#');           //lcd.print(".");
-        readSucc = read_mpu_6050_data(); //Read the raw acc and gyro data from the MPU-6050
+        // if (i % 200 == 0)
+        //     Serial.print('#');
+        readSucc = read_mpu_6050_data();
         if (!readSucc)
             cntFails++;
-        gyro_x_cal += gyro_x; //Add the gyro x-axis offset to the gyro_x_cal variable
-        gyro_y_cal += gyro_y; //Add the gyro y-axis offset to the gyro_y_cal variable
-        gyro_z_cal += gyro_z; //Add the gyro z-axis offset to the gyro_z_cal variable
-        delay(3);             //Delay 3ms to simulate the 250Hz program loop
+        gyro_x_cal += gyro_x;
+        gyro_y_cal += gyro_y;
+        gyro_z_cal += gyro_z;
+        delay(3); // Delay 3ms to simulate the 250Hz program loop
     }
     // Calc average offsets
     gyro_x_cal /= n;
     gyro_y_cal /= n;
     gyro_z_cal /= n;
 
-    Serial.println();
+    // Serial.println();
     // Serial.println(gyro_x_cal);
     // Serial.println(gyro_y_cal);
     // Serial.println(gyro_z_cal);
     // Serial.println(" Done.");
     if (cntFails > 0)
     {
-        Serial.print("Failed readings: ");
-        Serial.println(cntFails);
+        // Serial.print("Failed readings: ");
+        // Serial.println(cntFails);
         cntFails = 0;
         return false;
     }
@@ -95,6 +96,7 @@ bool Joop::init()
 //     }
 // }
 
+// Read the raw acc and gyro data from the MPU-6050
 bool Joop::read_mpu_6050_data()
 {                                 //Subroutine for reading the raw gyro and accelerometer data
     Wire.beginTransmission(0x68); //Start communicating with the MPU-6050
@@ -134,11 +136,11 @@ bool Joop::read_mpu_6050_data()
 
 void Joop::refresh()
 {
-    readSucc = read_mpu_6050_data(); //Read the raw acc and gyro data from the MPU-6050
+    readSucc = read_mpu_6050_data();
     //! if (!readSucc && cntFails++ > 1000)
     if (!readSucc)
     {
-        Serial.println('F');
+        // Serial.println('F');
         cntFails = 0;
     }
     // if (i++ % 1000 == 0)

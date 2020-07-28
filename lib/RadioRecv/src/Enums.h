@@ -3,7 +3,9 @@
 enum RadioRecvCode
 {
     None,
-    MotCmd = 101,
+    WheelPos = 101,
+    //todo // Obrtanje vozila u mestu.
+    //todo Spin,
     Pause,
     End,
 };

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <RH_ASK.h>
 #include <SPI.h>
 #include <Arduino.h>

@@ -6,7 +6,7 @@ const int pinLed = LED_BUILTIN;
 #include "Joop.h"
 Joop joop;
 
-const int pinBtn = 3;
+const int pinBtn = 9;
 #include <ClickButton.h>
 // Taster: pauza - 1 kratak klik, ponovna kalibracija - 2 kratka klika, kraj - 1 dugi klik
 ClickButton btn(pinBtn, LOW, CLICKBTN_PULLUP);
@@ -23,7 +23,7 @@ Phase phase;
 
 const int itvSend = 500; // Vremenski interval (u ms) na koji se salju poruke volana ka vozilu.
 const int DATA_LEN = 2;  // Duzina poruke (stringa) koju volan salje vozilu u bajtovima (karakterima).
-uint8_t msg[DATA_LEN];    // Poruka volana vozilu. Uobicajeno: pitch i roll, eventualno: pauza ili kraj upravljanja.
+uint8_t msg[DATA_LEN];   // Poruka volana vozilu. Uobicajeno: pitch i roll, eventualno: pauza ili kraj upravljanja.
 long cntSend = 0;
 long ms;
 
@@ -33,8 +33,8 @@ void resetCntSend() { cntSend = millis() / itvSend; }
 
 void phaseChange(Phase newPhase)
 {
-    Serial.print("Phase: ");
-    Serial.println(newPhase);
+    // Serial.print("Phase: ");
+    // Serial.println(newPhase);
     phase = newPhase;
     if (phase == Calibrating || phase == End)
         ledON(true);
@@ -60,12 +60,13 @@ void rfSend(int8_t x, int8_t y = 0)
     rf.send(msg, DATA_LEN);
     // rf.waitPacketSent();
     // 2 karaktera -> 78ms; 4 karaktera -> 90ms; 8 karaktera -> 114ms;
-    Serial.print(x);
-    Serial.print('\t');
-    Serial.println(y);
-    Serial.print(msg[0]);
-    Serial.print('\t');
-    Serial.println(msg[1]);
+
+    // Serial.print(x);
+    // Serial.print('\t');
+    // Serial.println(y);
+    // Serial.print(msg[0]);
+    // Serial.print('\t');
+    // Serial.println(msg[1]);
 }
 
 void setup()
@@ -73,7 +74,7 @@ void setup()
     pinMode(pinLed, OUTPUT);
     phaseChange(Calibrating);
     rf.init();
-    Serial.begin(57600);
+    // Serial.begin(57600);
     if (joop.init())
         phaseChange(Driving);
     else
@@ -100,7 +101,12 @@ void loop()
         if (phase == Driving)
             resetCntSend();
     }
-    if (btn.clicks == 2) // 2 kratka klika: ponovna kalibracija
+    if (btn.clicks == 2)
+    {
+        if (phase == Driving)
+            ; //todo: slanje spec koda (Spin) koji ce vozilo razumeti kao obrtanje u mestu
+    }
+    if (btn.clicks == 3) // 3 kratka klika: ponovna kalibracija
     {
         if (phase == Driving)
             phaseChange(Pause);
