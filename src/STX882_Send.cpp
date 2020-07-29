@@ -11,15 +11,9 @@ const int pinBtn = 9;
 // Taster: pauza - 1 kratak klik, ponovna kalibracija - 2 kratka klika, kraj - 1 dugi klik
 ClickButton btn(pinBtn, LOW, CLICKBTN_PULLUP);
 
-enum Phase
-{
-    Calibrating,
-    Driving,
-    Pause,
-    End,
-    Failure
-};
+#include "Phase.h"
 Phase phase;
+//B DrivingPhase drivePhase = NormalDrive;
 
 const int itvSend = 500; // Vremenski interval (u ms) na koji se salju poruke volana ka vozilu.
 const int DATA_LEN = 2;  // Duzina poruke (stringa) koju volan salje vozilu u bajtovima (karakterima).
@@ -36,9 +30,10 @@ void phaseChange(Phase newPhase)
     // Serial.print("Phase: ");
     // Serial.println(newPhase);
     phase = newPhase;
-    if (phase == Calibrating || phase == End)
+    if (phase == Calibrating || phase == Phase::End)
         ledON(true);
-    if (phase == Driving)
+    //B if (phase == DrivingNormal || phase == DrivingSpin)
+    if (isDrivingPhase(phase))
     {
         ledON(false);
         resetCntSend();
@@ -47,7 +42,7 @@ void phaseChange(Phase newPhase)
 
 void phaseRefresh(unsigned long ms)
 {
-    if (phase == Pause)
+    if (phase == Phase::Pause)
         ledON(ms % 3000 < 300);
     if (phase == Failure)
         ledON(ms % 2000 < 1000);
@@ -76,7 +71,7 @@ void setup()
     rf.init();
     // Serial.begin(57600);
     if (joop.init())
-        phaseChange(Driving);
+        phaseChange(DrivingNormal);
     else
         phaseChange(Failure);
 }
@@ -85,40 +80,45 @@ void loop()
 {
     joop.refresh();
 
-    if (phase == Driving && (ms = millis()) > cntSend * itvSend)
+    //B if (phase == Phase::Driving && (ms = millis()) > cntSend * itvSend)
+    if (isDrivingPhase(phase) && (ms = millis()) > cntSend * itvSend)
     {
         cntSend++;
-        rfSend(joop.getRoll(), joop.getPitch());
+        if (phase == DrivingNormal)
+            rfSend(joop.getRoll(), joop.getPitch());
+        if (phase == DrivingSpin)
+            rfSend(100 + DrivingSpin, joop.getPitch());
     }
 
     phaseRefresh(millis());
     btn.Update();
     if (btn.clicks == 1) // 1 kratak klik: voznja <-> pauza
     {
-        phaseChange(phase == Driving ? Pause : Driving);
-        if (phase == Pause)
+        //B phaseChange(phase == Phase::Driving ? Phase::Pause : Phase::Driving);
+        phaseChange(isDrivingPhase(phase) ? Phase::Pause : Phase::DrivingNormal);
+        if (phase == Phase::Pause)
             rfSend(100 + phase);
-        if (phase == Driving)
+        //B if (phase == Phase::Driving)
+        if (isDrivingPhase(phase))
             resetCntSend();
     }
-    if (btn.clicks == 2)
+    if (btn.clicks == 2 && isDrivingPhase(phase)) // 2 kratka klika: obrtanje vozila u mestu
     {
-        if (phase == Driving)
-            ; //todo: slanje spec koda (Spin) koji ce vozilo razumeti kao obrtanje u mestu
+        //B drivePhase = (drivePhase == NormalDrive) ? SpinDrive : NormalDrive;
+        phase = (phase == DrivingNormal) ? DrivingSpin : DrivingNormal;
     }
     if (btn.clicks == 3) // 3 kratka klika: ponovna kalibracija
     {
-        if (phase == Driving)
-            phaseChange(Pause);
-        phaseChange(Calibrating);
+        if (isDrivingPhase(phase))
+            phaseChange(Phase::Pause);
+        phaseChange(Phase::Calibrating);
         joop.calibrate();
-        phaseChange(Driving);
+        phaseChange(Phase::DrivingNormal);
         resetCntSend();
     }
     if (btn.clicks == -1) // 1 dugi klik: kraj
     {
-        phaseChange(End);
+        phaseChange(Phase::End);
         rfSend(100 + phase);
-        //* sleep?
     }
 }

@@ -24,6 +24,7 @@ bool Joop::calibrate()
     // Serial.print("\nCalibrating gyro... ");
     gyro_x_cal = gyro_y_cal = gyro_z_cal = 0;
     const int n = 1000; // Joop: 2000
+    
     for (int i = 0; i < n; i++)
     {
         // if (i % 200 == 0)

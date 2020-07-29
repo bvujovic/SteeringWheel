@@ -3,7 +3,7 @@
 #include <RH_ASK.h>
 #include <SPI.h>
 #include <Arduino.h>
-#include "Enums.h"
+#include "RadioRecvCode.h"
 
 #define RADIO_DATA_LEN 2
 
